@@ -1,0 +1,5 @@
+# Keep folder structure, ignore generated SQA artifacts
+/evidence/*
+!/evidence/.gitkeep
+/reports/*
+!/reports/.gitkeep

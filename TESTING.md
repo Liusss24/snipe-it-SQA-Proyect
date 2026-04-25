@@ -63,3 +63,23 @@ php artisan test --group=ldap
 php artisan test --exclude-group=ldap
 ```
 This can be helpful if a set of tests are failing because you don't have an extension, like LDAP, installed.
+
+## SQA Workspace
+
+To keep SQA execution organized, use the dedicated workspace in `tests/SQA`.
+
+### Folder layout
+
+- `tests/SQA/checklists/smoke-checklist.md`: fast validation after setup and major changes
+- `tests/SQA/checklists/regression-checklist.md`: broader validation before release
+- `tests/SQA/cases/manual-test-case-template.md`: reusable manual test case template
+- `tests/SQA/evidence/`: screenshots and logs gathered during testing
+- `tests/SQA/reports/`: final execution summaries and defect tracking docs
+
+### Recommended execution order
+
+1. Configure `.env.testing` from `.env.testing.example`.
+2. Run automated baseline tests (`Unit` and `Feature`).
+3. Execute smoke checklist.
+4. Execute regression checklist.
+5. Save evidence and report artifacts in the SQA folders.
