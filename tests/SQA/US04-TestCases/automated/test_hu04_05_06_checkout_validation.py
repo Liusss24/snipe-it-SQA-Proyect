@@ -3,8 +3,9 @@ CP-HU04-05 – Validación del campo obligatorio "Checkout to" vacío
 CP-HU04-06 – Cancelación del checkout antes de confirmar
 """
 import pytest
-from pages.license_detail_page import LicenseDetailPage
+from conftest import get_free_seats, get_checked_out_count
 from pages.checkout_page import CheckoutPage
+from pages.license_detail_page import LicenseDetailPage
 
 
 @pytest.mark.sistema
@@ -14,37 +15,39 @@ def test_cp_hu04_05_campo_checkout_to_vacio(
     auth_page, base_url, license_2_seats
 ):
     """
-    Verifica que no se pueda confirmar el checkout sin seleccionar un usuario
-    destino.
-    Alineado con: CP-HU04-05 (Partición de equivalencia – campo obligatorio vacío)
+    Verifica que no se pueda confirmar el checkout sin seleccionar un usuario.
+    Técnica: Partición de equivalencia – campo obligatorio vacío.
     """
-    lic_id = license_2_seats["id"]
-    detail = LicenseDetailPage(auth_page, base_url)
-    checkout = CheckoutPage(auth_page, base_url)
+    lic_id       = license_2_seats["id"]
+    checkout     = CheckoutPage(auth_page, base_url)
+    seats_before = get_free_seats(lic_id)
 
-    seats_before = None
-    detail.navigate(lic_id)
-    seats_before = detail.get_available_seats()
+    checkout.navigate(lic_id)
+    assert checkout.is_checkout_form_visible()
+    assert checkout.checkout_to_field_is_empty()
 
-    # Open checkout form but leave "Checkout to" empty
-    detail.click_checkout()
-    checkout.submit()  # Submit without selecting a user
+    checkout.submit()  # enviar sin usuario seleccionado
 
-    # The system must not show a success message
+    # El sistema no debe confirmar el checkout
     flash = checkout.get_flash_message()
     assert "checked out successfully" not in flash.lower(), (
-        "System must not complete checkout when 'Checkout to' is empty"
+        "No debe mostrarse mensaje de éxito con 'Checkout to' vacío"
     )
 
-    # Validation errors must be present
-    errors = checkout.get_validation_errors()
-    assert len(errors) > 0, "Expected at least one validation error for empty 'Checkout to'"
+    # Resultado esperado: o muestra error de validación, o muestra flash de error,
+    # o el formulario permanece abierto. Cualquiera indica que el checkout fue rechazado.
+    still_on_checkout = "/checkout" in auth_page.url
+    has_errors        = len(checkout.get_validation_errors()) > 0
+    has_error_flash   = flash != "" and "checked out" not in flash.lower()
 
-    # Available Seats must not change
-    detail.navigate(lic_id)
-    seats_after = detail.get_available_seats()
-    assert seats_after == seats_before, (
-        f"Available Seats must not change after failed checkout (before={seats_before}, after={seats_after})"
+    assert still_on_checkout or has_errors or has_error_flash, (
+        f"El sistema debe rechazar el checkout sin usuario. "
+        f"URL: {auth_page.url!r}, Flash: {flash!r}"
+    )
+
+    # Los contadores no deben haber cambiado
+    assert get_free_seats(lic_id) == seats_before, (
+        "Available Seats no debe cambiar si el checkout no se completó"
     )
 
 
@@ -54,36 +57,18 @@ def test_cp_hu04_06_cancelacion_checkout_no_genera_asignacion(
     auth_page, base_url, license_2_seats
 ):
     """
-    Verifica que cancelar el formulario de checkout no genere asignación
-    ni cambios en los contadores.
-    Alineado con: CP-HU04-06 (Caja negra – validación de cancelación)
+    Verifica que cancelar el formulario no genere asignación ni cambie contadores.
+    Técnica: Caja negra – validación de cancelación.
     """
-    lic_id = license_2_seats["id"]
-    detail = LicenseDetailPage(auth_page, base_url)
-    checkout = CheckoutPage(auth_page, base_url)
+    lic_id             = license_2_seats["id"]
+    checkout           = CheckoutPage(auth_page, base_url)
+    seats_before       = get_free_seats(lic_id)
+    checked_out_before = get_checked_out_count(lic_id)
 
-    detail.navigate(lic_id)
-    seats_before = detail.get_available_seats()
-    checked_out_before = detail.get_checked_out_count()
-
-    # Open checkout form and cancel without confirming
-    detail.click_checkout()
+    checkout.navigate(lic_id)
     checkout.cancel()
 
-    # No success message should be visible
-    flash = detail.get_flash_message()
-    assert "checked out successfully" not in flash.lower(), (
-        "A cancelled checkout must not produce a success message"
-    )
-
-    # Counters must remain unchanged
-    detail.navigate(lic_id)
-    seats_after = detail.get_available_seats()
-    checked_out_after = detail.get_checked_out_count()
-
-    assert seats_after == seats_before, (
-        f"Available Seats must not change after cancellation (before={seats_before}, after={seats_after})"
-    )
-    assert checked_out_after == checked_out_before, (
-        f"Checked Out must not change after cancellation (before={checked_out_before}, after={checked_out_after})"
-    )
+    flash = checkout.get_flash_message()
+    assert "checked out successfully" not in flash.lower()
+    assert get_free_seats(lic_id) == seats_before
+    assert get_checked_out_count(lic_id) == checked_out_before

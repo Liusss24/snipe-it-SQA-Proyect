@@ -10,9 +10,9 @@ class LoginPage:
         self.page.goto(f"{self.base_url}/login")
 
     def login(self, username: str, password: str):
-        self.page.fill("#username", username)
-        self.page.fill("#password", password)
-        self.page.click("button[type=submit]")
+        self.page.fill("input[name='username']", username)
+        self.page.fill("input[name='password']", password)
+        self.page.click("button[type='submit']")
         self.page.wait_for_load_state("load")
 
     def is_on_login_page(self) -> bool:
