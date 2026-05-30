@@ -2,6 +2,11 @@
 .couscous
 .DS_Store
 .env
+
+# Python test artifacts (SQA)
+__pycache__/
+*.py[cod]
+.pytest_cache/
 .env.testing
 phpstan.neon
 .idea
