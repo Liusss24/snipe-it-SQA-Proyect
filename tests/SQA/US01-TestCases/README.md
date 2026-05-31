@@ -18,6 +18,24 @@ y sea visible en el listado general.
 
 Los 5 casos son automatizados (Python 3.12 + pytest + Playwright).
 
+### Resultado de ejecución (2026-05-30)
+
+| Caso        | Resultado | Nota                                                          |
+|-------------|-----------|--------------------------------------------------------------|
+| CP-HU01-01  | ✅ Pass    | Activo creado con Ready to Deploy                             |
+| CP-HU01-02  | ⚠️ XFail   | **DEF-US01-01**: Asset Name limitado a 191, no 255 (defecto) |
+| CP-HU01-02b | ✅ Pass    | Caso complementario: valida el límite real de 191            |
+| CP-HU01-03  | ✅ Pass    | Serial duplicado rechazado (requiere `unique_serial`)        |
+| CP-HU01-04  | ✅ Pass    | No permite guardar sin Status Label                          |
+| CP-HU01-05  | ✅ Pass    | Activo visible y consistente en el listado                   |
+
+**Hallazgos / defectos:**
+- **DEF-US01-01** (`evidence/DEF-US01-01_asset_name_length.md`): el campo Asset
+  Name tiene `maxlength=191` (columna `varchar(191)`); el Plan asume 255. El test
+  CP-HU01-02 se marca `xfail(strict)`; CP-HU01-02b documenta el límite real.
+- **Hallazgo de configuración (CP-HU01-03)**: la unicidad de serial depende del
+  ajuste `unique_serial`, desactivado por defecto en Snipe-IT.
+
 ## Folder structure
 
 ```

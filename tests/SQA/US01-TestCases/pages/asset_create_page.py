@@ -23,26 +23,32 @@ class AssetCreatePage:
     # Navigation
     # ------------------------------------------------------------------
 
-    # Snipe-IT v8 organiza el formulario en pestañas personalizadas
-    # (componente "snipetab"). Los campos viven en paneles .tab-pane que
-    # están ocultos salvo el activo. Para automatizar el formulario completo
-    # revelamos todos los paneles tras cargar la página.
-    _REVEAL_TABS_JS = """() => {
+    # En el formulario de creación de Snipe-IT v8 el campo "Asset Name" (y otros)
+    # viven dentro de la sección colapsable "Optional Information"
+    # (div#optional_details con style="display:none"). Para poder rellenar todos
+    # los campos por automatización, expandimos esa sección (y cualquier otra
+    # sección colapsable) tras cargar la página.
+    _REVEAL_SECTIONS_JS = """() => {
+        const opt = document.getElementById('optional_details');
+        if (opt) { opt.style.display = 'block'; }
+        document.querySelectorAll('.collapse').forEach(c => {
+            c.style.display = 'block';
+            c.classList.add('in', 'show');
+        });
         document.querySelectorAll('.tab-pane').forEach(p => {
             p.classList.add('active', 'in', 'show');
             p.classList.remove('fade');
             p.style.display = 'block';
-            p.style.opacity = '1';
         });
     }"""
 
     def navigate(self):
         self.page.goto(f"{self.base_url}/hardware/create")
         self.page.wait_for_load_state("networkidle")
-        self._reveal_all_tabs()
+        self._reveal_hidden_sections()
 
-    def _reveal_all_tabs(self):
-        self.page.evaluate(self._REVEAL_TABS_JS)
+    def _reveal_hidden_sections(self):
+        self.page.evaluate(self._REVEAL_SECTIONS_JS)
         self.page.wait_for_timeout(200)
 
     # ------------------------------------------------------------------
