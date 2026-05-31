@@ -3,3 +3,6 @@
 !/evidence/.gitkeep
 /reports/*
 !/reports/.gitkeep
+# Entregables SQA versionados (informe final y su generador)
+!/reports/*.docx
+!/reports/gen_informe.js
