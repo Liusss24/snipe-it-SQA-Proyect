@@ -15,8 +15,13 @@ y sea visible en el listado general.
 | CP-HU01-03  | Bloqueo de creación con serial duplicado                    | Sistema     | Automated  | Alta     |
 | CP-HU01-04  | No permite guardar sin Status Label                         | Sistema     | Automated  | Alta     |
 | CP-HU01-05  | El activo creado aparece en el listado de Assets            | Integración | Automated  | Alta     |
+| CP-HU01-16  | Bloqueo de acceso sin permisos al formulario de creación    | Sistema     | Automated  | Alta     |
+| CP-HU01-17  | Validación de campo obligatorio Location vacío              | Sistema     | Automated  | Alta     |
+| CP-HU01-18  | Bloqueo de creación con ubicación inexistente               | Integración | Automated  | Alta     |
+| CP-HU01-19  | Registro de creación en el historial de acciones            | Integración | Automated  | Media    |
+| CP-HU01-20  | Sanitización del campo Asset Name ante entrada tipo script  | Sistema     | Automated  | Media    |
 
-Los 5 casos son automatizados (Python 3.12 + pytest + Playwright).
+Los 10 casos son automatizados (Python 3.14 + pytest + Playwright).
 
 ### Resultado de ejecución (2026-05-30)
 
@@ -29,12 +34,28 @@ Los 5 casos son automatizados (Python 3.12 + pytest + Playwright).
 | CP-HU01-04  | ✅ Pass    | No permite guardar sin Status Label                          |
 | CP-HU01-05  | ✅ Pass    | Activo visible y consistente en el listado                   |
 
-**Hallazgos / defectos:**
+**Hallazgos / defectos (CP-HU01-01 a CP-HU01-05):**
 - **DEF-US01-01** (`evidence/DEF-US01-01_asset_name_length.md`): el campo Asset
   Name tiene `maxlength=191` (columna `varchar(191)`); el Plan asume 255. El test
   CP-HU01-02 se marca `xfail(strict)`; CP-HU01-02b documenta el límite real.
 - **Hallazgo de configuración (CP-HU01-03)**: la unicidad de serial depende del
   ajuste `unique_serial`, desactivado por defecto en Snipe-IT.
+
+**Resultado de ejecución CP-HU01-16 a CP-HU01-20 — pendiente**
+
+| Caso        | Resultado | Nota |
+|-------------|-----------|------|
+| CP-HU01-16  | _Pendiente_ | |
+| CP-HU01-17  | _Pendiente_ | xfail previsto (DEF-US01-17) |
+| CP-HU01-17b | _Pendiente_ | Caso complementario |
+| CP-HU01-18  | _Pendiente_ | |
+| CP-HU01-19  | _Pendiente_ | |
+| CP-HU01-20  | _Pendiente_ | |
+
+**Hallazgos / defectos (CP-HU01-16 a CP-HU01-20):**
+- **DEF-US01-17** (`evidence/DEF-US01-17_location_no_obligatorio.md`): el campo
+  Default Location no es obligatorio en Snipe-IT v8. El Plan asume que es requerido.
+  CP-HU01-17 se marca `xfail(strict)`; CP-HU01-17b documenta el comportamiento real.
 
 ## Folder structure
 
@@ -44,17 +65,23 @@ US01-TestCases/
 ├── requirements.txt
 ├── pytest.ini
 ├── .env / .env.example
-├── conftest.py            ← fixtures: browser, auth, datos maestros, unique_serial
+├── conftest.py            ← fixtures: browser, auth, noperm, datos maestros, unique_serial
 ├── pages/                 ← Page Object Models
 │   ├── login_page.py
 │   ├── asset_create_page.py
-│   └── asset_list_page.py
+│   ├── asset_list_page.py
+│   └── asset_detail_page.py       ← CP-HU01-19, CP-HU01-20
 ├── automated/
 │   ├── test_hu01_01_02_create_asset_valid.py
 │   ├── test_hu01_03_04_create_asset_negative.py
-│   └── test_hu01_05_integration.py
-├── cases/                 ← CP-HU01-01.md … CP-HU01-05.md
+│   ├── test_hu01_05_integration.py
+│   ├── test_hu01_16_permisos.py             ← CP-HU01-16
+│   ├── test_hu01_17_18_location_negative.py ← CP-HU01-17, CP-HU01-17b, CP-HU01-18
+│   └── test_hu01_19_20_historial_xss.py     ← CP-HU01-19, CP-HU01-20
+├── cases/                 ← CP-HU01-01.md … CP-HU01-05.md, CP-HU01-16.md … CP-HU01-20.md
 ├── evidence/
+│   ├── DEF-US01-17_location_no_obligatorio.md
+│   └── .gitkeep
 └── reports/
 ```
 
