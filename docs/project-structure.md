@@ -4,15 +4,22 @@ This document explains the conventions, folder layout, and initialization steps 
 any new User Story (US) test branch in this project. Use it as the entry point when
 starting QA work on a new US.
 
-> ⚠️ **DISCLAIMER — el stack puede variar según la US.** US01 y US04 se automatizaron
-> con **Python 3.12 + pytest + Playwright**, y gran parte de esta guía asume ese stack
-> (fixtures `conftest.py`, Page Objects, `pytest.ini`, etc.). Sin embargo, **la herramienta
-> de cada caso la define el `Plan de Pruebas.docx`** y puede ser distinta: Selenium,
-> JMeter (rendimiento), Pest/PHPUnit (backend), o pruebas manuales. Antes de copiar la
-> plantilla de Python, **revisá qué herramienta exige la US**: si no es Python/Playwright,
-> adaptá la estructura (lenguaje, dependencias, runner) y tomá de esta guía sólo lo que
-> aplique de forma transversal — convenciones de carpetas/ramas/commits, documentación de
-> casos `.md`, flujo de defectos, datos del entorno Docker y generación del informe.
+## ⚠️ Disclaimer — Stack may vary per US
+
+US01 and US04 were automated with **Python 3.12 + pytest + Playwright**, and most of this
+guide assumes that stack (`conftest.py` fixtures, Page Objects, `pytest.ini`, etc.).
+However, **the tool for each case is defined by `Plan de Pruebas.docx`** and may differ:
+Selenium, JMeter (performance), Pest/PHPUnit (backend), or manual testing.
+
+Before copying the Python template, **check which tool the US requires**. If it is not
+Python/Playwright, adapt the structure (language, dependencies, runner) and take from this
+guide only what applies cross-cutting:
+
+- Folder/branch/commit conventions
+- Case documentation (`.md` files)
+- Defects workflow
+- Docker environment data
+- Report generation
 
 ---
 
@@ -464,7 +471,7 @@ es un entregable de uso personal y `tests/SQA/.gitignore` lo excluye con la regl
 - [ ] `evidence/.gitkeep` and `reports/.gitkeep` are committed (so folders exist in repo)
 - [ ] Test data was cleaned from the instance (no residual licenses/users/assets/master data)
 - [ ] Settings toggled for tests (e.g. `unique_serial`) were restored to their original value
-- [ ] Commit author is Aarón Líos Cubillo (Liusss24); **no Co-Authored-By: Claude** trailer
+- [ ] Commit author is María Paula Castillo Chinchilla (PauCCH); **no Co-Authored-By: Claude** trailer
 
 ---
 

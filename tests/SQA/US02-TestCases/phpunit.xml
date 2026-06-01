@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="bootstrap.php"
+         colors="true"
+         failOnEmptyTestSuite="false">
+
+    <testsuites>
+        <testsuite name="US02-TestCases">
+            <directory suffix=".php">automated</directory>
+        </testsuite>
+    </testsuites>
+
+    <!--
+        Grupos disponibles:
+          integracion  – pruebas de integración (backend / API)
+          sistema      – pruebas de sistema (flujo completo)
+          positivos    – casos con datos válidos
+          negativos    – casos con datos inválidos o estados no permitidos
+          permisos     – control de acceso
+          high         – prioridad alta
+          medium       – prioridad media
+    -->
+
+</phpunit>
