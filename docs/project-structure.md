@@ -4,6 +4,16 @@ This document explains the conventions, folder layout, and initialization steps 
 any new User Story (US) test branch in this project. Use it as the entry point when
 starting QA work on a new US.
 
+> ⚠️ **DISCLAIMER — el stack puede variar según la US.** US01 y US04 se automatizaron
+> con **Python 3.12 + pytest + Playwright**, y gran parte de esta guía asume ese stack
+> (fixtures `conftest.py`, Page Objects, `pytest.ini`, etc.). Sin embargo, **la herramienta
+> de cada caso la define el `Plan de Pruebas.docx`** y puede ser distinta: Selenium,
+> JMeter (rendimiento), Pest/PHPUnit (backend), o pruebas manuales. Antes de copiar la
+> plantilla de Python, **revisá qué herramienta exige la US**: si no es Python/Playwright,
+> adaptá la estructura (lenguaje, dependencias, runner) y tomá de esta guía sólo lo que
+> aplique de forma transversal — convenciones de carpetas/ramas/commits, documentación de
+> casos `.md`, flujo de defectos, datos del entorno Docker y generación del informe.
+
 ---
 
 ## Context
@@ -131,13 +141,22 @@ tests/
 
 ## Tools per test type
 
+> La herramienta de cada caso la dicta el `Plan de Pruebas.docx`. La tabla siguiente es
+> orientativa; **US01 y US04 usaron la fila de Python + Playwright**, pero otras US pueden
+> caer en cualquiera de las demás filas (o combinar varias).
+
 | Test type        | Tools                                   | Notes                              |
 |------------------|-----------------------------------------|------------------------------------|
-| UI / Sistema     | Python 3.12 + pytest + Playwright       | Chromium, 1920×1080                |
-| UI / Integración | Python 3.12 + pytest + Playwright       | Cross-module checks                |
+| UI / Sistema     | Python 3.12 + pytest + Playwright       | Stack usado en US01/US04. Chromium, 1920×1080 |
+| UI / Integración | Python 3.12 + pytest + Playwright       | Stack usado en US01/US04. Cross-module checks |
+| UI (alternativa) | Selenium WebDriver (Python u otro)      | Si el plan lo pide en vez de Playwright |
 | Manual           | Markdown case file + manual execution   | Fill "Actual result" and evidence  |
-| Performance      | JMeter                                  | Separate `.jmx` project            |
-| Unit / Backend   | Pest (PHP)                              | `php artisan test --testsuite=...` |
+| Performance      | JMeter                                  | Proyecto `.jmx` aparte; no usa pytest |
+| Unit / Backend   | Pest / PHPUnit (PHP)                     | `php artisan test --testsuite=...` |
+
+Si la US **no** usa Python/Playwright, las secciones de esta guía sobre `conftest.py`,
+Page Objects, `pytest.ini` y los patrones de Select2/AJAX **no aplican**; usá en su lugar la
+estructura propia de la herramienta correspondiente, manteniendo igual el resto de convenciones.
 
 ---
 
@@ -426,8 +445,9 @@ When adding a US, append its rows to the `usXXCases` arrays and add any new code
 > picture). Per-US/partial reports include 2, 3, 5 and 7. This is what the current
 > `Informe de Pruebas - US01 y US04.docx` does.
 
-The `.docx` and `gen_informe.js` are versioned despite `tests/SQA/.gitignore` ignoring
-`/reports/*` — explicit `!` exceptions for `*.docx` and `gen_informe.js` were added there.
+**Versionado:** `gen_informe.js` **sí** se versiona (código reproducible). El **`.docx` NO**:
+es un entregable de uso personal y `tests/SQA/.gitignore` lo excluye con la regla
+`/reports/*.docx`. Cualquiera puede regenerar el informe ejecutando `gen_informe.js`.
 
 ---
 
