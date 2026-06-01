@@ -3,6 +3,7 @@
 !/evidence/.gitkeep
 /reports/*
 !/reports/.gitkeep
-# Entregables SQA versionados (informe final y su generador)
-!/reports/*.docx
+# El generador del informe sí se versiona (código reproducible)
 !/reports/gen_informe.js
+# El Informe de Pruebas (.docx) es de uso personal: NO se versiona
+/reports/*.docx
