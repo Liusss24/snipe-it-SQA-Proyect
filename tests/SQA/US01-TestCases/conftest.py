@@ -13,6 +13,8 @@ BASE_URL        = os.getenv("SNIPEIT_BASE_URL",       "http://localhost:8000")
 ADMIN_USERNAME  = os.getenv("SNIPEIT_ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD  = os.getenv("SNIPEIT_ADMIN_PASSWORD", "password")
 API_TOKEN       = os.getenv("SNIPEIT_API_TOKEN",      "")
+NOPERM_USERNAME = os.getenv("SNIPEIT_NOPERM_USERNAME", "viewer")
+NOPERM_PASSWORD = os.getenv("SNIPEIT_NOPERM_PASSWORD", "password")
 
 DB_CONTAINER    = os.getenv("SNIPEIT_DB_CONTAINER",   "snipeit-db-1")
 DB_NAME         = os.getenv("SNIPEIT_DB_NAME",        "snipeit_db")
@@ -74,6 +76,20 @@ def delete_assets_by_serial(serial: str) -> None:
                 pass
 
 
+def find_assets_by_tag(tag: str) -> list[dict]:
+    """Returns assets whose asset_tag matches exactly."""
+    rows = _api("GET", f"/hardware?search={tag}&limit=50").get("rows", [])
+    return [r for r in rows if (r.get("asset_tag") or "") == tag]
+
+
+def get_asset_activity(asset_id: int) -> list[dict]:
+    """Returns the action log entries for a given asset.
+    Snipe-IT v8 does not expose /hardware/{id}/activity.
+    The correct endpoint is /reports/activity filtered by item_type + item_id.
+    """
+    return _api("GET", f"/reports/activity?item_type=asset&item_id={asset_id}&limit=50").get("rows", [])
+
+
 def _status_id_by_name(name: str) -> int:
     rows = _api("GET", "/statuslabels?limit=50").get("rows", [])
     for r in rows:
@@ -130,6 +146,18 @@ def auth_page(context: BrowserContext) -> Page:
     p.goto(f"{BASE_URL}/login")
     p.fill("input[name='username']", ADMIN_USERNAME)
     p.fill("input[name='password']", ADMIN_PASSWORD)
+    p.click("button[type='submit']")
+    p.wait_for_url(f"{BASE_URL}/**", wait_until="load")
+    return p
+
+
+@pytest.fixture(scope="function")
+def noperm_page(context: BrowserContext) -> Page:
+    """Page logged in as the restricted user (viewer) — no asset-create permissions."""
+    p = context.new_page()
+    p.goto(f"{BASE_URL}/login")
+    p.fill("input[name='username']", NOPERM_USERNAME)
+    p.fill("input[name='password']", NOPERM_PASSWORD)
     p.click("button[type='submit']")
     p.wait_for_url(f"{BASE_URL}/**", wait_until="load")
     return p
