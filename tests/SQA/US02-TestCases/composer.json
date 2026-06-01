@@ -1,0 +1,30 @@
+{
+    "name": "snipe-it-sqa/us02-testcases",
+    "description": "SQA – US02 Asset Checkout test suite (Pest)",
+    "require": {
+        "php": "^8.3"
+    },
+    "require-dev": {
+        "pestphp/pest": "^3.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "autoload-dev": {
+        "files": [
+            "Helpers/ApiClient.php",
+            "Helpers/Fixtures.php",
+            "Helpers/DbHelper.php"
+        ]
+    },
+    "scripts": {
+        "test":        "./vendor/bin/pest automated/ --colors=always",
+        "test:verbose": "./vendor/bin/pest automated/ --colors=always --testdox",
+        "test:group":  "./vendor/bin/pest automated/ --colors=always --group="
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable"
+}
