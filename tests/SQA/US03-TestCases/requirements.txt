@@ -1,0 +1,5 @@
+pytest>=8.0
+pytest-html>=4.0
+selenium>=4.18
+webdriver-manager>=4.0
+python-dotenv>=1.0
