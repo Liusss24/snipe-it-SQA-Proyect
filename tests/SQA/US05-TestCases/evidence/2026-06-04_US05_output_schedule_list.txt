@@ -1,0 +1,10 @@
+﻿
+  0    0 * * *  php artisan snipeit:inventory-alerts  Next Due: 2 hours from now
+  0    0 * * *  php artisan snipeit:expiring-alerts  Next Due: 2 hours from now
+  0    0 * * *  php artisan snipeit:expected-checkin  Next Due: 2 hours from now
+  0    0 * * *  php artisan snipeit:upcoming-audits  Next Due: 2 hours from now
+  0    0 * * 0  php artisan snipeit:backup ......... Next Due: 2 days from now
+  0    0 * * *  php artisan backup:clean .......... Next Due: 2 hours from now
+  */15 * * * *  php artisan auth:clear-resets ... Next Due: 6 minutes from now
+  0    0 * * 0  php artisan saml:clear_expired_nonces  Next Due: 2 days from now
+
