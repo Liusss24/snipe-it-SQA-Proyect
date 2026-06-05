@@ -125,7 +125,7 @@ def test_cp_hu01_12_asset_tag_duplicado(auth_page, base_url, asset_prereqs, asse
         "DEF-US01-01: El campo Asset Name tiene maxlength=191 (columna varchar(191)). "
         "Snipe-IT acepta el nombre de 256 caracteres mediante automatización (Playwright "
         "bypasea maxlength) y lo almacena truncado a 191 sin mostrar error de validación. "
-        "Ver evidence/DEF-US05-01_garantia_dia_actual.md"
+        "Ver evidence/DEF-US01-01_asset_name_truncado.md"
     ),
 )
 def test_cp_hu01_13_asset_name_mayor_255(auth_page, base_url, asset_prereqs, asset_registry):
