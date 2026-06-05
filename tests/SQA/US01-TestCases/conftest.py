@@ -45,6 +45,24 @@ def _api(method: str, endpoint: str, data: dict | None = None, retries: int = 3)
 
 
 # ---------------------------------------------------------------------------
+# Find-or-create helper (added by Ignacio Alpízar – handles existing data)
+# ---------------------------------------------------------------------------
+
+def _find_or_create(endpoint: str, name: str, create_data: dict) -> dict:
+    """GET existing entity by name or POST to create it. Returns the payload dict.
+
+    Snipe-IT's POST endpoints return payload=null when the entity already exists
+    (unique constraint). This helper searches first to avoid that issue.
+    """
+    search_ep = endpoint.split("?")[0]
+    rows = _api("GET", f"/{search_ep}?limit=100").get("rows", [])
+    existing = next((r for r in rows if r.get("name") == name), None)
+    if existing:
+        return existing
+    return _api("POST", f"/{search_ep}", create_data).get("payload") or {}
+
+
+# ---------------------------------------------------------------------------
 # Asset query helpers (source of truth for assertions)
 # ---------------------------------------------------------------------------
 
@@ -185,24 +203,24 @@ def asset_prereqs():
     """
     created = {}
 
-    cat = _api("POST", "/categories", {
+    cat = _find_or_create("categories", "Laptops", {
         "name": "Laptops", "category_type": "asset",
-    }).get("payload", {})
+    })
     created["category_id"] = cat.get("id")
 
-    man = _api("POST", "/manufacturers", {"name": "Dell"}).get("payload", {})
+    man = _find_or_create("manufacturers", "Dell", {"name": "Dell"})
     created["manufacturer_id"] = man.get("id")
 
-    model = _api("POST", "/models", {
+    model = _find_or_create("models", "Dell Latitude 5420", {
         "name": "Dell Latitude 5420",
         "category_id": created["category_id"],
         "manufacturer_id": created["manufacturer_id"],
         "model_number": "LAT-5420",
-    }).get("payload", {})
+    })
     created["model_id"] = model.get("id")
     created["model_name"] = "Dell Latitude 5420"
 
-    loc = _api("POST", "/locations", {"name": "Oficina Central"}).get("payload", {})
+    loc = _find_or_create("locations", "Oficina Central", {"name": "Oficina Central"})
     created["location_id"] = loc.get("id")
     created["location_name"] = "Oficina Central"
 

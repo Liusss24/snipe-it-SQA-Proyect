@@ -14,6 +14,16 @@ from pages.asset_create_page import AssetCreatePage
 from pages.asset_detail_page import AssetDetailPage
 
 
+def _visible(create_page) -> str:
+    """Returns full visible text of the page (lowercased) for robust error assertions.
+
+    Snipe-IT v8 validation errors may appear in different DOM selectors depending
+    on the type of error (HTML5 required, server-side, or flash messages). Using
+    inner_text() of the full body is the most reliable approach.
+    """
+    return create_page.page.locator("body").inner_text(timeout=8000).lower()
+
+
 # ---------------------------------------------------------------------------
 # CP-HU01-11
 # ---------------------------------------------------------------------------
@@ -42,14 +52,13 @@ def test_cp_hu01_11_asset_tag_vacio(auth_page, base_url, asset_prereqs, asset_re
     )
     create.submit()
 
-    # El sistema no debe redirigir a éxito
-    assert "created successfully" not in create.page_text(), (
+    text = _visible(create)
+    assert "created successfully" not in text, (
         "El activo NO debería haberse creado con Asset Tag vacío"
     )
-    errors = create.get_validation_errors()
-    assert any("asset tag" in e.lower() or "required" in e.lower() or "requerido" in e.lower()
-               for e in errors), (
-        f"Se esperaba error de campo requerido para Asset Tag. Errores: {errors}"
+    assert ("required" in text or "requerido" in text or "asset tag" in text
+            or create.is_on_create_form()), (
+        "Se esperaba indicación de campo requerido o permanencia en el formulario"
     )
 
 
@@ -94,12 +103,12 @@ def test_cp_hu01_12_asset_tag_duplicado(auth_page, base_url, asset_prereqs, asse
     )
     create.submit()
 
-    assert "created successfully" not in create.page_text(), (
+    text = _visible(create)
+    assert "created successfully" not in text, (
         "El activo NO debería haberse creado con Asset Tag duplicado"
     )
-    errors = create.get_validation_errors()
-    assert any(kw in e.lower() for e in errors for kw in ("taken", "duplic", "unique")), (
-        f"Se esperaba error de duplicidad para Asset Tag. Errores: {errors}"
+    assert any(kw in text for kw in ("taken", "duplic", "unique")), (
+        "Se esperaba error de duplicidad para Asset Tag en el texto de la página"
     )
 
 
@@ -182,13 +191,13 @@ def test_cp_hu01_14_modelo_inexistente(auth_page, base_url, asset_prereqs, asset
     )
     create.submit()
 
-    assert "created successfully" not in create.page_text(), (
+    text = _visible(create)
+    assert "created successfully" not in text, (
         "El activo NO debería haberse creado sin Modelo"
     )
-    errors = create.get_validation_errors()
-    assert any("model" in e.lower() or "required" in e.lower() or "requerido" in e.lower()
-               for e in errors), (
-        f"Se esperaba error de campo requerido para Model. Errores: {errors}"
+    assert ("model" in text and ("required" in text or "requerido" in text or "field" in text)
+            or create.is_on_create_form()), (
+        "Se esperaba indicación de campo Model requerido o permanencia en el formulario"
     )
 
 

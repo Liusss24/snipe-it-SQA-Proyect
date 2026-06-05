@@ -99,17 +99,12 @@ def run_expiring_alerts() -> str:
 
 
 def _tinker(php_code: str) -> str:
-    """Executes a PHP snippet via artisan tinker and returns stdout."""
-    script_path = "/tmp/qa_us05_tinker.php"
-    # Write to container
-    write_proc = subprocess.run(
-        ARTISAN_PREFIX[:-2] + ["sh", "-c", f"cat > {script_path}"],
-        input=f"<?php\n{php_code}\n",
-        capture_output=True,
-        text=True,
-        timeout=10,
-    )
-    return run_artisan("tinker", script_path)
+    """Executes a PHP snippet via artisan tinker --execute and returns stdout.
+
+    Uses the --execute flag (same approach proven in qa_tests/snipeit_helpers.py).
+    The code is passed as a single subprocess argument, so newlines are preserved.
+    """
+    return run_artisan("tinker", "--execute", php_code)
 
 
 def configure_alerts(days: int = 30, email: str | None = None, enabled: int = 1) -> None:
@@ -243,7 +238,11 @@ def create_asset(asset_tag: str, name: str, serial: str,
                  warranty_months: int | None = None,
                  eol_date: str | None = None,
                  archived: bool = False) -> dict:
-    """Creates an asset via the REST API and returns the payload dict."""
+    """Creates an asset via the REST API and returns the payload dict.
+
+    If archived=True, the asset is created first and then archived via
+    artisan tinker, because the REST API ignores the archived field on creation.
+    """
     prereqs = _get_prereqs()
     data: dict = {
         "asset_tag":       asset_tag,
@@ -259,9 +258,18 @@ def create_asset(asset_tag: str, name: str, serial: str,
         data["warranty_months"] = warranty_months
     if eol_date:
         data["asset_eol_date"] = eol_date
-    if archived:
-        data["archived"] = 1
-    return _api_payload("POST", "/hardware", data)
+
+    payload = _api_payload("POST", "/hardware", data)
+
+    # REST API ignores archived=1 on creation — set it via artisan tinker
+    if archived and payload.get("id"):
+        asset_id = payload["id"]
+        _tinker(
+            f"App\\Models\\Asset::where('id', {asset_id})->update(['archived' => 1]);"
+            f" echo 'archived asset {asset_id}';"
+        )
+
+    return payload
 
 
 def delete_asset_by_tag(tag: str) -> None:
